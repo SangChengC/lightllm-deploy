@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lightllm-chart.fullname" . }}
+  labels:
+    {{- include "lightllm-chart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "lightllm-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "lightllm-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "lightllm-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          command:
+              ["python", "-m", "lightllm.server.api_server"]
+          args:
+            {{- if .Values.startupArgs.model_dir }}
+            - "--model_dir"
+            - "{{ .Values.startupArgs.model_dir }}"
+            {{- end }}
+            {{- if .Values.startupArgs.host }}
+            - "--host"
+            - "{{ .Values.startupArgs.host }}"
+            {{- end }}
+            {{- if .Values.startupArgs.port }}
+            - "--port"
+            - "{{ .Values.startupArgs.port }}"
+            {{- end }}
+            {{- if .Values.startupArgs.nccl_port }}
+            - "--nccl_port"
+            - "{{ .Values.startupArgs.nccl_port }}"
+            {{- end }}
+            {{- if .Values.startupArgs.tp }}
+            - "--tp"
+            - "{{ .Values.startupArgs.tp }}"
+            {{- end }}
+            {{- if .Values.startupArgs.max_req_input_len }}
+            - "--max_req_input_len"
+            - "{{ .Values.startupArgs.max_req_input_len }}"
+            {{- end }}
+            {{- if .Values.startupArgs.max_req_total_len }}
+            - "--max_req_total_len"
+            - "{{ .Values.startupArgs.max_req_total_len }}"
+            {{- end }}
+            {{- if .Values.startupArgs.max_total_token_num }}
+            - "--max_total_token_num"
+            - "{{ .Values.startupArgs.max_total_token_num }}"
+            {{- end }}
+            {{- if .Values.startupArgs.tokenizer_mode }}
+            - "--tokenizer_mode"
+            - "{{ .Values.startupArgs.tokenizer_mode }}"
+            {{- end }}
+            {{- if .Values.startupArgs.use_dynamic_prompt_cache }}
+            - "--use_dynamic_prompt_cache"
+            {{- end }}
+            {{- if .Values.startupArgs.trust_remote_code }}
+            - "--trust_remote_code"
+            {{- end }}
+            {{- if .Values.startupArgs.mode }}
+            - "--mode"
+            - "{{ .Values.startupArgs.mode }}"
+            {{- end }}
+            {{- if .Values.startupArgs.data_type }}
+            - "--data_type"
+            - "{{ .Values.startupArgs.data_type }}"
+            {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
