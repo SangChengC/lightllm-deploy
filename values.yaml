@@ -109,5 +109,5 @@ modelData:
   storageClassName: "open-local-lvm-xfs"        # StorageClass 名称
   accessModes:
     - ReadOnlyMany                              # 访问模式，根据需求调整
-  size: 800Gi                                   # 请求的存储大小
+  size: 400Gi                                   # 请求的存储大小
   mountPath: "/path/to/model/data"              # 在容器内的挂载路径
