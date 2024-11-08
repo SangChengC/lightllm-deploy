@@ -51,23 +51,34 @@ spec:
               ["python", "-m", "lightllm.server.api_server"]
           args:
             {{- $args := list }}
-            {{- $args = append $args "--model" .Values.lightllm.startupArgs.model_dir }}
-            {{- $args = append $args "--host" .Values.lightllm.startupArgs.host }}
-            {{- $args = append $args "--port" (printf "%d" .Values.lightllm.startupArgs.port) }}
-            {{- $args = append $args "--nccl_port" (printf "%d" .Values.lightllm.startupArgs.nccl_port) }}
-            {{- $args = append $args "--tp" (printf "%d" .Values.lightllm.startupArgs.tp) }}
-            {{- $args = append $args "--max_req_input_len" (printf "%d" .Values.lightllm.startupArgs.max_req_input_len) }}
-            {{- $args = append $args "--max_req_total_len" (printf "%d" .Values.lightllm.startupArgs.max_req_total_len) }}
-            {{- $args = append $args "--max_total_token_num" (printf "%d" .Values.lightllm.startupArgs.max_total_token_num) }}
-            {{- $args = append $args "--tokenizer_mode" .Values.lightllm.startupArgs.tokenizer_mode }}
+            {{- $args = append $args "--model" }}
+            {{- $args = append $args .Values.lightllm.startupArgs.model_dir }}
+            {{- $args = append $args "--host" }}
+            {{- $args = append $args .Values.lightllm.startupArgs.host }}
+            {{- $args = append $args "--port" }}
+            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.port) }}
+            {{- $args = append $args "--nccl_port" }}
+            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.nccl_port) }}
+            {{- $args = append $args "--tp" }}
+            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.tp) }}
+            {{- $args = append $args "--max_req_input_len" }}
+            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.max_req_input_len) }}
+            {{- $args = append $args "--max_req_total_len" }}
+            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.max_req_total_len) }}
+            {{- $args = append $args "--max_total_token_num" }}
+            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.max_total_token_num) }}
+            {{- $args = append $args "--tokenizer_mode" }}
+            {{- $args = append $args .Values.lightllm.startupArgs.tokenizer_mode }}
             {{- if .Values.lightllm.startupArgs.use_dynamic_prompt_cache }}
             {{- $args = append $args "--use_dynamic_prompt_cache" }}
             {{- end }}
             {{- if .Values.lightllm.startupArgs.trust_remote_code }}
             {{- $args = append $args "--trust_remote_code" }}
             {{- end }}
-            {{- $args = append $args "--mode" .Values.lightllm.startupArgs.mode }}
-            {{- $args = append $args "--data_type" .Values.lightllm.startupArgs.data_type }}
+            {{- $args = append $args "--mode" }}
+            {{- $args = append $args .Values.lightllm.startupArgs.mode }}
+            {{- $args = append $args "--data_type" }}
+            {{- $args = append $args .Values.lightllm.startupArgs.data_type }}
             {{- if .Values.lightllm.additionalArgs }}
             {{- range $arg := splitList " " .Values.lightllm.additionalArgs }}
             {{- $args = append $args $arg }}
