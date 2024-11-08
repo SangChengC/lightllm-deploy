@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "lightllm.fullname" . }}-model-data
+  labels:
+    {{- include "lightllm.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.modelData.accessModes | nindent 4 }}
+  storageClassName: {{ .Values.modelData.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.modelData.size }}
+

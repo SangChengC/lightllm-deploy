@@ -5,14 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: registry.sensetime.com/linklink/llm/lightllm
+  repository: gai-registry-cn-beijing.cr.volces.com/devsft-ccr-0/lightllm-server
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest-721f037c-cu121"
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+  tag: "latest-9bf04aeb"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -38,7 +34,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 18001
 
 ingress:
   enabled: false
@@ -61,26 +57,14 @@ resources: {}
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-startupArgs:
-  model_dir: null
-  host: "0.0.0.0"
-  port: 18001
-  nccl_port: 28769
-  tp: 1
-  max_req_input_len: 16384
-  max_req_total_len: 16385
-  max_total_token_num: 16385
-  tokenizer_mode: "auto"
-  use_dynamic_prompt_cache: true
-  trust_remote_code: true
-  mode: "triton_gqa_flashdecoding"
-  data_type: "bf16"
+  limits:
+    cpu: 2000m
+    memory: 8Gi
+    nvidia.com/gpu: 8
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+    nvidia.com/gpu: 8
 
 autoscaling:
   enabled: false
@@ -89,8 +73,46 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
+nodeSelector: 
+  accelerator: nvidia
 
-tolerations: []
+tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Exists"
+    effect: "NoSchedule"
 
-affinity: {}
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: "accelerator"
+              operator: In
+              values:
+                - "nvidia"
+
+# LightLLM 启动参数
+lightllm:
+  startupArgs:
+    model_dir: "/path/to/model/data"               # 模型目录
+    host: "0.0.0.0"                        # 服务监听的主机地址
+    port: 18001                            # 服务监听的端口
+    nccl_port: 28769                       # NCCL 通信端口
+    tp: 1                                  # Tensor 并行度
+    max_req_input_len: 16384               # 请求的最大输入长度
+    max_req_total_len: 16385               # 请求的最大总长度
+    max_total_token_num: 16385             # 最大 token 数
+    tokenizer_mode: "auto"                 # 分词器模式
+    use_dynamic_prompt_cache: true         # 是否使用动态提示缓存
+    trust_remote_code: true                # 是否信任远程代码
+    mode: "triton_gqa_flashdecoding"       # 运行模式
+    data_type: "bf16"                      # 数据类型
+  additionalArgs: ""                       # 其他启动参数（可选）
+
+ # 模型数据卷配置（如果需要挂载模型文件）
+modelData:
+  storageClassName: "open-local-lvm-xfs"        # StorageClass 名称
+  accessModes:
+    - ReadOnlyMany                              # 访问模式，根据需求调整
+  size: 800Gi                                   # 请求的存储大小
+  mountPath: "/path/to/model/data"              # 在容器内的挂载路径
