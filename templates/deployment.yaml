@@ -48,46 +48,66 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           command:
-              ["python", "-m", "lightllm.server.api_server"]
+            ["python", "-m", "lightllm.server.api_server"]
           args:
-            {{- $args := list }}
-            {{- $args = append $args "--model" }}
-            {{- $args = append $args .Values.lightllm.startupArgs.model_dir }}
-            {{- $args = append $args "--host" }}
-            {{- $args = append $args .Values.lightllm.startupArgs.host }}
-            {{- $args = append $args "--port" }}
-            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.port) }}
-            {{- $args = append $args "--nccl_port" }}
-            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.nccl_port) }}
-            {{- $args = append $args "--tp" }}
-            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.tp) }}
-            {{- $args = append $args "--max_req_input_len" }}
-            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.max_req_input_len) }}
-            {{- $args = append $args "--max_req_total_len" }}
-            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.max_req_total_len) }}
-            {{- $args = append $args "--max_total_token_num" }}
-            {{- $args = append $args (printf "%d" .Values.lightllm.startupArgs.max_total_token_num) }}
-            {{- $args = append $args "--tokenizer_mode" }}
-            {{- $args = append $args .Values.lightllm.startupArgs.tokenizer_mode }}
+            {{- if .Values.lightllm.startupArgs.model_dir }}
+            - "--model_dir"
+            - "{{ .Values.lightllm.startupArgs.model_dir }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.host }}
+            - "--host"
+            - "{{ .Values.lightllm.startupArgs.host }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.port }}
+            - "--port"
+            - "{{ .Values.lightllm.startupArgs.port | toString }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.nccl_port }}
+            - "--nccl_port"
+            - "{{ .Values.lightllm.startupArgs.nccl_port | toString }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.tp }}
+            - "--tp"
+            - "{{ .Values.lightllm.startupArgs.tp | toString }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.max_req_input_len }}
+            - "--max_req_input_len"
+            - "{{ .Values.lightllm.startupArgs.max_req_input_len | toString }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.max_req_total_len }}
+            - "--max_req_total_len"
+            - "{{ .Values.lightllm.startupArgs.max_req_total_len | toString }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.max_total_token_num }}
+            - "--max_total_token_num"
+            - "{{ .Values.lightllm.startupArgs.max_total_token_num | toString }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.tokenizer_mode }}
+            - "--tokenizer_mode"
+            - "{{ .Values.lightllm.startupArgs.tokenizer_mode }}"
+            {{- end }}
             {{- if .Values.lightllm.startupArgs.use_dynamic_prompt_cache }}
-            {{- $args = append $args "--use_dynamic_prompt_cache" }}
+            - "--use_dynamic_prompt_cache"
             {{- end }}
             {{- if .Values.lightllm.startupArgs.trust_remote_code }}
-            {{- $args = append $args "--trust_remote_code" }}
+            - "--trust_remote_code"
             {{- end }}
-            {{- $args = append $args "--mode" }}
-            {{- $args = append $args .Values.lightllm.startupArgs.mode }}
-            {{- $args = append $args "--data_type" }}
-            {{- $args = append $args .Values.lightllm.startupArgs.data_type }}
+            {{- if .Values.lightllm.startupArgs.mode }}
+            - "--mode"
+            - "{{ .Values.lightllm.startupArgs.mode }}"
+            {{- end }}
+            {{- if .Values.lightllm.startupArgs.data_type }}
+            - "--data_type"
+            - "{{ .Values.lightllm.startupArgs.data_type }}"
+            {{- end }}
             {{- if .Values.lightllm.additionalArgs }}
             {{- range $arg := splitList " " .Values.lightllm.additionalArgs }}
-            {{- $args = append $args $arg }}
+            - "{{ $arg }}"
             {{- end }}
             {{- end }}
-            {{- toYaml $args | nindent 12 }}
           volumeMounts:
             - name: model-data
-              mountPath: {{ .Values.modelData.mountPath }}-model-data
+              mountPath: {{ .Values.modelData.mountPath }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
