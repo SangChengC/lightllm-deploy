@@ -55,11 +55,11 @@ resources:
   limits:
     cpu: 4000m                        # CPU 限制，2 核
     memory: 8Gi                       # 内存限制，4 GiB
-    nvidia.com/gpu: 1                 # GPU 限制，1 个 GPU
+    nvidia.com/gpu: 8                 # GPU 限制，1 个 GPU
   requests:
     cpu: 2000m                        # CPU 请求，1 核
     memory: 4Gi                       # 内存请求，2 GiB
-    nvidia.com/gpu: 1                 # GPU 请求，1 个 GPU
+    nvidia.com/gpu: 8                 # GPU 请求，1 个 GPU
 
 autoscaling:
   enabled: false
@@ -69,7 +69,7 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: 
-  accelerator: nvidia
+  sensechat.com/node-gpu: "True"
 
 tolerations:
   - key: "nvidia.com/gpu"
