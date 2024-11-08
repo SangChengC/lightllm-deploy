@@ -108,6 +108,10 @@ spec:
           volumeMounts:
             - name: model-data
               mountPath: {{ .Values.modelData.mountPath }}
+      volumes:
+        - name: model-data
+          persistentVolumeClaim:
+            claimName: {{ include "lightllm-chart.fullname" . }}-model-data
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
